@@ -1,0 +1,51 @@
+# Here you can define all your datasets by using simple YAML syntax.
+#
+# Documentation for this file format can be found in "The Data Catalog"
+# Link: https://docs.kedro.org/en/stable/data/data_catalog.html
+# Raw CSVs
+races_csv:
+  type: pandas.CSVDataset
+  filepath: data/01_raw/races.csv
+  load_args:
+    parse_dates: ['date','time','fp1_date','fp1_time']
+
+drivers_csv:
+  type: pandas.CSVDataset
+  filepath: data/01_raw/drivers.csv
+  load_args:
+    parse_dates: ['dob']
+
+constructors_csv:
+  type: pandas.CSVDataset
+  filepath: data/01_raw/constructors.csv
+
+results_csv:
+  type: pandas.CSVDataset
+  filepath: data/01_raw/results.csv
+
+# Intermediates
+merged_data:
+  type: pandas.ParquetDataset
+  filepath: data/02_intermediate/merged_data.parquet
+
+features:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/features.parquet
+
+# Models and model outputs (Regresion)
+regression_models:
+  type: pickle.PickleDataset
+  filepath: data/06_models/regression/models_regression.pkl
+
+regression_results:
+  type: pandas.ParquetDataset
+  filepath: data/04_models/regression/regression_results.parquet
+
+# Models and model outputs (Clasificacion)
+classification_models:
+  type: pickle.PickleDataset
+  filepath: data/06_models/classification/models_classification.pkl
+
+classification_results:
+  type: pandas.ParquetDataset
+  filepath: data/04_models/classification/classification_results.parquet
