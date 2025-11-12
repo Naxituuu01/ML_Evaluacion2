@@ -1,0 +1,15 @@
+stages:
+  train:
+    cmd: kedro run
+    deps:
+      - src/f1kedro/pipelines/classification/nodes.py
+      - src/f1kedro/pipelines/regression/nodes.py
+      - data/01_raw/
+    outs:
+      - data/07_models_output/
+    metrics:
+      - data/08_reporting/classification_metrics_flat.json:
+          cache: false
+      - data/08_reporting/regression_metrics_flat.json:
+          cache: false
+  

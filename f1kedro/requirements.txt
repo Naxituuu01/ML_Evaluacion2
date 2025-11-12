@@ -6,3 +6,5 @@ kedro-datasets[pandas]
 scikit-learn
 pyarrow
 fastparquet
+imbalanced-learn
+dvc

@@ -1,8 +1,8 @@
-# Here you can define all your datasets by using simple YAML syntax.
-#
-# Documentation for this file format can be found in "The Data Catalog"
-# Link: https://docs.kedro.org/en/stable/data/data_catalog.html
-# Raw CSVs
+# =========================
+# 📁 DATA CATALOG - F1Kedro
+# =========================
+
+# Raw data
 races_csv:
   type: pandas.CSVDataset
   filepath: data/01_raw/races.csv
@@ -23,7 +23,10 @@ results_csv:
   type: pandas.CSVDataset
   filepath: data/01_raw/results.csv
 
-# Intermediates
+
+# =========================
+# 🧩 INTERMEDIATE DATA
+# =========================
 merged_data:
   type: pandas.ParquetDataset
   filepath: data/02_intermediate/merged_data.parquet
@@ -32,20 +35,26 @@ features:
   type: pandas.ParquetDataset
   filepath: data/03_primary/features.parquet
 
-# Models and model outputs (Regresion)
-regression_models:
-  type: pickle.PickleDataset
-  filepath: data/06_models/regression/models_regression.pkl
 
+# =========================
+# 🔢 REGRESIÓN
+# =========================
+regression_split_data:
+  type: MemoryDataset
+
+# Resultados de los modelos de regresión
 regression_results:
   type: pandas.ParquetDataset
-  filepath: data/04_models/regression/regression_results.parquet
+  filepath: data/07_model_output/regression/regression_results.parquet
 
-# Models and model outputs (Clasificacion)
-classification_models:
-  type: pickle.PickleDataset
-  filepath: data/06_models/classification/models_classification.pkl
 
+# =========================
+# 🧠 CLASIFICACIÓN
+# =========================
+classification_split_data:
+  type: MemoryDataset
+
+# NOTA: los modelos se guardan individualmente, no hace falta listarlos todos aquí
 classification_results:
   type: pandas.ParquetDataset
-  filepath: data/04_models/classification/classification_results.parquet
+  filepath: data/07_model_output/classification/classification_results.parquet

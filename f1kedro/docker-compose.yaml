@@ -1,0 +1,79 @@
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
+      - POSTGRES_DB=airflow
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow"]
+      interval: 5s
+      retries: 5
+
+  airflow-init:
+    image: apache/airflow:2.10.1
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+      - _AIRFLOW_DB_UPGRADE=true
+      - _AIRFLOW_WWW_USER_CREATE=true
+      - _AIRFLOW_WWW_USER_USERNAME=admin
+      - _AIRFLOW_WWW_USER_PASSWORD=admin
+      - _AIRFLOW_WWW_USER_FIRSTNAME=Ignacio
+      - _AIRFLOW_WWW_USER_LASTNAME=Retamales
+      - _AIRFLOW_WWW_USER_EMAIL=i.retamales@duocuc.cl
+    command: >
+      bash -c "pip install kedro joblib scikit-learn pandas numpy matplotlib seaborn imblearn kedro-datasets[pandas] && airflow db upgrade && airflow users create --username admin --firstname Ignacio --lastname Retamales --role Admin --email i.retamales@duocuc.cl --password admin"
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - .:/opt/airflow/kedro_project
+
+  webserver:
+    image: apache/airflow:2.10.1
+    depends_on:
+      - airflow-init
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+      - AIRFLOW__WEBSERVER__RBAC=True
+      - AIRFLOW__WEBSERVER__DEFAULT_UI_TIMEZONE=America/Santiago
+    ports:
+      - "8080:8080"
+    command: >
+      bash -c "pip install kedro joblib scikit-learn pandas numpy matplotlib seaborn imblearn kedro-datasets[pandas] && airflow webserver"
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - .:/opt/airflow/kedro_project
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  scheduler:
+    image: apache/airflow:2.10.1
+    depends_on:
+      webserver:
+        condition: service_healthy
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+    command: >
+      bash -c "pip install kedro joblib scikit-learn pandas numpy matplotlib seaborn imblearn kedro-datasets[pandas] && airflow scheduler"
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - .:/opt/airflow/kedro_project
+
+volumes:
+  postgres_data: {}
